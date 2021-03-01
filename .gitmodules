@@ -1,0 +1,8 @@
+[submodule "third_party/bls"]
+	path = third_party/bls
+	url = https://github.com/hyperion-hyn/bls
+	branch = v0.0.6-cgo
+[submodule "third_party/mcl"]
+	path = third_party/mcl
+	url = https://github.com/hyperion-hyn/mcl
+	branch = fix-static-link
