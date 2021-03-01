@@ -1,5 +1,6 @@
 pragma solidity 0.5.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "./lib/TokenManager.sol";
 
 interface MintableToken {
@@ -10,7 +11,7 @@ interface BurnableToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-contract ERC20HecoManager {
+contract ERC20HecoManager is Ownable {
     mapping(bytes32 => bool) public usedEvents_;
     mapping(address => address) public mappings;
 
@@ -28,19 +29,19 @@ contract ERC20HecoManager {
         bytes32 receiptId
     );
 
-    address public wallet;
-    modifier onlyWallet {
-        require(msg.sender == wallet, "HecoManager/not-authorized");
-        _;
-    }
-
-    /**
-     * @dev constructor
-     * @param _wallet is the multisig wallet
-     */
-    constructor(address _wallet) public {
-        wallet = _wallet;
-    }
+//    address public wallet;
+//    modifier onlyWallet {
+//        require(msg.sender == wallet, "HecoManager/not-authorized");
+//        _;
+//    }
+//
+//    /**
+//     * @dev constructor
+//     * @param _wallet is the multisig wallet
+//     */
+//    constructor(address _wallet) public {
+//        wallet = _wallet;
+//    }
 
     /**
      * @dev map an atlas token to heco
@@ -102,7 +103,7 @@ contract ERC20HecoManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public onlyWallet {
+    ) public onlyOwner {
         require(
             !usedEvents_[receiptId],
             "HecoManager/The lock event cannot be reused"

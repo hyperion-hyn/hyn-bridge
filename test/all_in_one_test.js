@@ -1,22 +1,22 @@
-const MetaCoin = artifacts.require("MetaCoin");
+const Atlas_manager_test = artifacts.require("MetaCoin");
 const truffleAssert = require('truffle-assertions');
 
 contract('MetaCoin', (accounts) => {
   it('should put 10000 MetaCoin in the first account', async () => {
-    const metaCoinInstance = await MetaCoin.deployed();
+    const metaCoinInstance = await Atlas_manager_test.deployed();
     const balance = await metaCoinInstance.getBalance.call(accounts[0]);
 
     assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
   });
   it('should call a function that depends on a linked library', async () => {
-    const metaCoinInstance = await MetaCoin.deployed();
+    const metaCoinInstance = await Atlas_manager_test.deployed();
     const metaCoinBalance = (await metaCoinInstance.getBalance.call(accounts[0])).toNumber();
     const metaCoinEthBalance = (await metaCoinInstance.getBalanceInEth.call(accounts[0])).toNumber();
 
     assert.equal(metaCoinEthBalance, 2 * metaCoinBalance, 'Library function returned unexpected function, linkage may be broken');
   });
   it('should send coin correctly', async () => {
-    const metaCoinInstance = await MetaCoin.deployed();
+    const metaCoinInstance = await Atlas_manager_test.deployed();
 
     // Setup 2 accounts.
     const accountOne = accounts[0];

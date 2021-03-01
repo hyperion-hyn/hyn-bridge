@@ -3,8 +3,9 @@ pragma solidity 0.5.17;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 
-contract ERC20AtlasManager {
+contract ERC20AtlasManager is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -26,19 +27,19 @@ contract ERC20AtlasManager {
         bytes32 receiptId
     );
 
-    address public wallet;
-    modifier onlyWallet {
-        require(msg.sender == wallet, "AtlasManager/not-authorized");
-        _;
-    }
+//    address public wallet;
+//    modifier onlyWallet {
+//        require(msg.sender == wallet, "AtlasManager/not-authorized");
+//        _;
+//    }
 
-    /**
-     * @dev constructor
-     * @param _wallet is the multisig wallet
-     */
-    constructor(address _wallet) public {
-        wallet = _wallet;
-    }
+//    /**
+//     * @dev constructor
+//     * @param _wallet is the multisig wallet
+//     */
+//    constructor() public {
+//        wallet = _wallet;
+//    }
 
     /**
      * @dev lock tokens to be minted on heco chain
@@ -76,7 +77,7 @@ contract ERC20AtlasManager {
         address userAddr,
         uint256 amount,
         address recipient
-    ) public onlyWallet {
+    ) public onlyOwner {
         require(
             recipient != address(0),
             "AtlasManager/recipient is a zero address"
@@ -102,7 +103,7 @@ contract ERC20AtlasManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public onlyWallet {
+    ) public onlyOwner {
         require(
             !usedEvents_[receiptId],
             "AtlasManager/The burn event cannot be reused"
@@ -140,7 +141,7 @@ contract ERC20AtlasManager {
         uint256 amount,
         address payable recipient,
         bytes32 receiptId
-    ) public onlyWallet {
+    ) public onlyOwner {
         require(
             !usedEvents_[receiptId],
             "AtlasManager/The burn event cannot be reused"
