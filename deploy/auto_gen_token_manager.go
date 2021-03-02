@@ -154,7 +154,7 @@ func bindTokenManager(address common.Address, caller bind.ContractCaller, transa
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_TokenManager *TokenManagerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_TokenManager *TokenManagerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _TokenManager.Contract.TokenManagerCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -173,7 +173,7 @@ func (_TokenManager *TokenManagerRaw) Transact(opts *bind.TransactOpts, method s
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_TokenManager *TokenManagerCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_TokenManager *TokenManagerCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _TokenManager.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -192,12 +192,17 @@ func (_TokenManager *TokenManagerTransactorRaw) Transact(opts *bind.TransactOpts
 //
 // Solidity: function isOwner() view returns(bool)
 func (_TokenManager *TokenManagerCaller) IsOwner(opts *bind.CallOpts) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _TokenManager.contract.Call(opts, out, "isOwner")
-	return *ret0, err
+	var out []interface{}
+	err := _TokenManager.contract.Call(opts, &out, "isOwner")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // IsOwner is a free data retrieval call binding the contract method 0x8f32d59b.
@@ -218,12 +223,17 @@ func (_TokenManager *TokenManagerCallerSession) IsOwner() (bool, error) {
 //
 // Solidity: function mappedTokens(address ) view returns(address)
 func (_TokenManager *TokenManagerCaller) MappedTokens(opts *bind.CallOpts, arg0 common.Address) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _TokenManager.contract.Call(opts, out, "mappedTokens", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _TokenManager.contract.Call(opts, &out, "mappedTokens", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // MappedTokens is a free data retrieval call binding the contract method 0xe6ede14d.
@@ -244,12 +254,17 @@ func (_TokenManager *TokenManagerCallerSession) MappedTokens(arg0 common.Address
 //
 // Solidity: function owner() view returns(address)
 func (_TokenManager *TokenManagerCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _TokenManager.contract.Call(opts, out, "owner")
-	return *ret0, err
+	var out []interface{}
+	err := _TokenManager.contract.Call(opts, &out, "owner")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -270,12 +285,17 @@ func (_TokenManager *TokenManagerCallerSession) Owner() (common.Address, error) 
 //
 // Solidity: function wards(address ) view returns(uint256)
 func (_TokenManager *TokenManagerCaller) Wards(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _TokenManager.contract.Call(opts, out, "wards", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _TokenManager.contract.Call(opts, &out, "wards", arg0)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Wards is a free data retrieval call binding the contract method 0xbf353dbb.
@@ -588,6 +608,7 @@ func (_TokenManager *TokenManagerFilterer) ParseOwnershipTransferred(log types.L
 	if err := _TokenManager.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -740,5 +761,6 @@ func (_TokenManager *TokenManagerFilterer) ParseTokenMapAck(log types.Log) (*Tok
 	if err := _TokenManager.contract.UnpackLog(event, "TokenMapAck", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }

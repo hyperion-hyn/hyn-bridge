@@ -154,7 +154,7 @@ func bindERC20HecoManager(address common.Address, caller bind.ContractCaller, tr
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20HecoManager *ERC20HecoManagerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20HecoManager *ERC20HecoManagerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20HecoManager.Contract.ERC20HecoManagerCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -173,7 +173,7 @@ func (_ERC20HecoManager *ERC20HecoManagerRaw) Transact(opts *bind.TransactOpts, 
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20HecoManager *ERC20HecoManagerCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20HecoManager *ERC20HecoManagerCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20HecoManager.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -192,12 +192,17 @@ func (_ERC20HecoManager *ERC20HecoManagerTransactorRaw) Transact(opts *bind.Tran
 //
 // Solidity: function isOwner() view returns(bool)
 func (_ERC20HecoManager *ERC20HecoManagerCaller) IsOwner(opts *bind.CallOpts) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _ERC20HecoManager.contract.Call(opts, out, "isOwner")
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20HecoManager.contract.Call(opts, &out, "isOwner")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // IsOwner is a free data retrieval call binding the contract method 0x8f32d59b.
@@ -218,12 +223,17 @@ func (_ERC20HecoManager *ERC20HecoManagerCallerSession) IsOwner() (bool, error) 
 //
 // Solidity: function mappings(address ) view returns(address)
 func (_ERC20HecoManager *ERC20HecoManagerCaller) Mappings(opts *bind.CallOpts, arg0 common.Address) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _ERC20HecoManager.contract.Call(opts, out, "mappings", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20HecoManager.contract.Call(opts, &out, "mappings", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Mappings is a free data retrieval call binding the contract method 0x41102619.
@@ -244,12 +254,17 @@ func (_ERC20HecoManager *ERC20HecoManagerCallerSession) Mappings(arg0 common.Add
 //
 // Solidity: function owner() view returns(address)
 func (_ERC20HecoManager *ERC20HecoManagerCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _ERC20HecoManager.contract.Call(opts, out, "owner")
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20HecoManager.contract.Call(opts, &out, "owner")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -270,12 +285,17 @@ func (_ERC20HecoManager *ERC20HecoManagerCallerSession) Owner() (common.Address,
 //
 // Solidity: function usedEvents_(bytes32 ) view returns(bool)
 func (_ERC20HecoManager *ERC20HecoManagerCaller) UsedEvents(opts *bind.CallOpts, arg0 [32]byte) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _ERC20HecoManager.contract.Call(opts, out, "usedEvents_", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20HecoManager.contract.Call(opts, &out, "usedEvents_", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // UsedEvents is a free data retrieval call binding the contract method 0xbccc9fcf.
@@ -569,6 +589,7 @@ func (_ERC20HecoManager *ERC20HecoManagerFilterer) ParseBurned(log types.Log) (*
 	if err := _ERC20HecoManager.contract.UnpackLog(event, "Burned", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -705,6 +726,7 @@ func (_ERC20HecoManager *ERC20HecoManagerFilterer) ParseMinted(log types.Log) (*
 	if err := _ERC20HecoManager.contract.UnpackLog(event, "Minted", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -857,5 +879,6 @@ func (_ERC20HecoManager *ERC20HecoManagerFilterer) ParseOwnershipTransferred(log
 	if err := _ERC20HecoManager.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }

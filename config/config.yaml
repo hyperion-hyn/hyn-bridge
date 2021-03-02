@@ -1,0 +1,9 @@
+env: test
+dev:
+  url: http://127.0.0.1:8545
+
+test:
+  url: http://atlas-archive-1062433233.ap-south-1.elb.amazonaws.com
+
+prod:
+  url: https://atlas-archive.hyn.space
