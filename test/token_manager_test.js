@@ -1,41 +1,59 @@
-const Atlas_manager_test = artifacts.require("MetaCoin");
+const TokenManager = artifacts.require("TokenManager");
 const truffleAssert = require('truffle-assertions');
 
-contract('MetaCoin', (accounts) => {
-  it('should put 10000 MetaCoin in the first account', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
-    const balance = await metaCoinInstance.getBalance.call(accounts[0]);
+let tokenManagerInstance;
 
-    assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
-  });
-  it('should call a function that depends on a linked library', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
-    const metaCoinBalance = (await metaCoinInstance.getBalance.call(accounts[0])).toNumber();
-    const metaCoinEthBalance = (await metaCoinInstance.getBalanceInEth.call(accounts[0])).toNumber();
+contract('TokenManager Testing', (accounts) => {
+    beforeEach("Initialize TokenManager contract instance", async () => {
+        tokenManagerInstance = await TokenManager.new();
+    });
 
-    assert.equal(metaCoinEthBalance, 2 * metaCoinBalance, 'Library function returned unexpected function, linkage may be broken');
-  });
-  it('should send coin correctly', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
+    it("test all", async () => {
+        const userAddToken = accounts[1];
 
-    // Setup 2 accounts.
-    const accountOne = accounts[0];
-    const accountTwo = accounts[1];
+        const rpTokenAddress = '0x562D6AFA2A0aD94c8B2946e23C96E27F3cD023e8';
+        const name = 'RP TOKEN';
+        const symbol = 'RP';
+        const decimals = 18;
+        await truffleAssert.fails(
+            tokenManagerInstance.addToken(rpTokenAddress, name, symbol, decimals, {from: userAddToken}),
+            truffleAssert.ErrorType.REVERT,
+            'TokenManager/not-authorized'
+        )
 
-    // Get initial balances of first and second account.
-    const accountOneStartingBalance = (await metaCoinInstance.getBalance.call(accountOne)).toNumber();
-    const accountTwoStartingBalance = (await metaCoinInstance.getBalance.call(accountTwo)).toNumber();
+        let erc20Token = '';
 
-    // Make transaction from first account to second.
-    const amount = 10;
-    await metaCoinInstance.sendCoin(accountTwo, amount, { from: accountOne });
+        await tokenManagerInstance.rely(userAddToken)
+        let tx = await tokenManagerInstance.addToken(rpTokenAddress, name, symbol, decimals, {from: userAddToken})
+        await truffleAssert.eventEmitted(tx, 'TokenMapAck', (ev) => {
+            erc20Token = ev.tokenAck;
+            return ev.tokenReq === rpTokenAddress;
+        }, "TokenMapAck should be emitted");
 
-    // Get balances of first and second account after the transactions.
-    const accountOneEndingBalance = (await metaCoinInstance.getBalance.call(accountOne)).toNumber();
-    const accountTwoEndingBalance = (await metaCoinInstance.getBalance.call(accountTwo)).toNumber();
+        await truffleAssert.fails(
+            tokenManagerInstance.addToken(rpTokenAddress, name, symbol, decimals, {from: userAddToken}),
+            truffleAssert.ErrorType.REVERT,
+            'TokenManager/ethToken already mapped'
+        )
 
+        let hecoToken = await tokenManagerInstance.mappedTokens(rpTokenAddress);
+        assert.equal(hecoToken, erc20Token);
 
-    assert.equal(accountOneEndingBalance, accountOneStartingBalance - amount, "Amount wasn't correctly taken from the sender");
-    assert.equal(accountTwoEndingBalance, accountTwoStartingBalance + amount, "Amount wasn't correctly sent to the receiver");
-  });
+        await truffleAssert.passes(
+            tokenManagerInstance.removeToken(rpTokenAddress, 0, {from: userAddToken})
+        );
+
+        hynToken = await tokenManagerInstance.mappedTokens(erc20Token);
+        assert.equal('0x0000000000000000000000000000000000000000', hynToken);
+
+        // deny
+        await  tokenManagerInstance.deny(userAddToken)
+        await truffleAssert.fails(
+            tokenManagerInstance.addToken(rpTokenAddress, name, symbol, decimals, {from: userAddToken}),
+            truffleAssert.ErrorType.REVERT,
+            'TokenManager/not-authorized'
+        )
+
+    });
+
 });

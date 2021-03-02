@@ -11,9 +11,11 @@ bootstrap_ganache() {
     fi
     mkdir $TESTING_DIR
 
-    # Run ganache
+    MN="solar deliver swim universe uphold valley magic dish debate oyster certain remember"
+
+    # Run ganache https://github.com/trufflesuite/ganache-cli/blob/master/README.md
     echo "Starting gananche"
-    ganache-cli -a 90 -e 10000000000000000 -p 7545 -h 127.0.0.1 -g 10000000000 -l 10000000 -i 5777 \
+    ganache-cli -a 90 -e 100 -p 7545 -h 127.0.0.1 -g 10000000000 -l 10000000 -i 5777 -d -m $MN \
         --acctKeys=$TESTING_DIR/accounnt_private.text --db $TESTING_DIR/db \
         2>&1 > $TESTING_DIR/ganache-output-$(date +%Y-%M-%dT%H:%M:%S).txt &
 }

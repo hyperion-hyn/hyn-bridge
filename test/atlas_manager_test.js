@@ -1,41 +1,56 @@
-const Atlas_manager_test = artifacts.require("MetaCoin");
+const ERC20AtlasManager = artifacts.require("ERC20AtlasManager");
+const MyERC20 = artifacts.require("MyERC20");
 const truffleAssert = require('truffle-assertions');
 
-contract('MetaCoin', (accounts) => {
-  it('should put 10000 MetaCoin in the first account', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
-    const balance = await metaCoinInstance.getBalance.call(accounts[0]);
+let atlasManager;
+let atlas20Token;
 
-    assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
+contract('ERC20AtlasManager Testing', (accounts) => {
+  let admin = accounts[0];  // deploy all contract
+  let user = accounts[1];   // user account
+  let recipient = accounts[2];
+
+  beforeEach("Initialize contract instance", async () => {
+    atlasManager = await ERC20AtlasManager.new();
+
+    // deploy atlas20Token
+    const name = 'RP TOKEN';
+    const symbol = 'RP';
+    const decimals = 18;
+    atlas20Token = await MyERC20.new(name, symbol, decimals);
   });
-  it('should call a function that depends on a linked library', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
-    const metaCoinBalance = (await metaCoinInstance.getBalance.call(accounts[0])).toNumber();
-    const metaCoinEthBalance = (await metaCoinInstance.getBalanceInEth.call(accounts[0])).toNumber();
 
-    assert.equal(metaCoinEthBalance, 2 * metaCoinBalance, 'Library function returned unexpected function, linkage may be broken');
+  it("test all", async () => {
+    let hynTokenAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
+    console.log('account', accounts[0]);
+
+    let balance = await web3.eth.getBalance(recipient, 'latest')
+    console.log('balance begin:', web3.utils.fromWei(balance, 'ether'), balance)
+
+    let value = web3.utils.toWei('1', 'ether');
+    let tx = await atlasManager.lockHyn(value, recipient, {from: recipient, value});
+    await truffleAssert.eventEmitted(tx, 'Locked', (ev) => {
+      return ev.token === hynTokenAddress && ev.amount == value && ev.recipient === recipient && ev.sender === recipient;
+    }, "Locked event should be emitted");
+
+    balance = await web3.eth.getBalance(recipient, 'latest')
+    console.log('balance after lock:', web3.utils.fromWei(balance, 'ether'))
+
+    // await hecoManager.mintToken(heco20Token.address, web3.utils.toWei('1', 'ether'), recipient, '0x041a37cedac8dd5e898751523e2c6bef7e97f1f9abde27eb659702f72dd1fe02')
+
+    /// hyn token 0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    // const addressHyn = '0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    // const nameHyn = 'Hyperion Token';
+    // const symbolHyn = 'HYN';
+    // const decimalsHyn = 18;
+    // truffleAssert.passes(
+    //     hecoManager.addToken(tokenManagerAddr, addressHyn, nameHyn, symbolHyn, decimalsHyn)
+    // );
+
+
+    // await heco20Token.approve(hecoManager.address, web3.utils.toWei('1', 'ether'))
+    // hecoManager.mint
   });
-  it('should send coin correctly', async () => {
-    const metaCoinInstance = await Atlas_manager_test.deployed();
 
-    // Setup 2 accounts.
-    const accountOne = accounts[0];
-    const accountTwo = accounts[1];
-
-    // Get initial balances of first and second account.
-    const accountOneStartingBalance = (await metaCoinInstance.getBalance.call(accountOne)).toNumber();
-    const accountTwoStartingBalance = (await metaCoinInstance.getBalance.call(accountTwo)).toNumber();
-
-    // Make transaction from first account to second.
-    const amount = 10;
-    await metaCoinInstance.sendCoin(accountTwo, amount, { from: accountOne });
-
-    // Get balances of first and second account after the transactions.
-    const accountOneEndingBalance = (await metaCoinInstance.getBalance.call(accountOne)).toNumber();
-    const accountTwoEndingBalance = (await metaCoinInstance.getBalance.call(accountTwo)).toNumber();
-
-
-    assert.equal(accountOneEndingBalance, accountOneStartingBalance - amount, "Amount wasn't correctly taken from the sender");
-    assert.equal(accountTwoEndingBalance, accountTwoStartingBalance + amount, "Amount wasn't correctly sent to the receiver");
-  });
 });

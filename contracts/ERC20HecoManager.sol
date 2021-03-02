@@ -23,7 +23,7 @@ contract ERC20HecoManager is Ownable {
     );
 
     event Minted(
-        address hecoToken,
+        address token,
         uint256 amount,
         address recipient,
         bytes32 receiptId
@@ -57,7 +57,7 @@ contract ERC20HecoManager is Ownable {
         string memory name,
         string memory symbol,
         uint8 decimals
-    ) public {
+    ) public onlyOwner {
         address heco20TokenAddr = TokenManager(tokenManager).addToken(
             hynTokenAddr,
             name,
@@ -72,7 +72,7 @@ contract ERC20HecoManager is Ownable {
      * @param tokenManager address to token manager
      * @param hynTokenAddr address to remove token
      */
-    function removeToken(address tokenManager, address hynTokenAddr) public {
+    function removeToken(address tokenManager, address hynTokenAddr) public onlyOwner {
         TokenManager(tokenManager).removeToken(hynTokenAddr, 0);
     }
 

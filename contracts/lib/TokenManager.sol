@@ -70,7 +70,7 @@ contract TokenManager is Ownable {
      * @param ethTokenAddr address of the ethereum token
      * @return oneToken of the mapped harmony token
      */
-    function registerToken(address ethTokenAddr, address oneTokenAddr)
+    function registerToken(address ethTokenAddr, address hecoTokenAddr)
         public
         auth
         returns (bool)
@@ -85,7 +85,7 @@ contract TokenManager is Ownable {
         );
 
         // store the mapping and created address
-        mappedTokens[ethTokenAddr] = oneTokenAddr;
+        mappedTokens[ethTokenAddr] = hecoTokenAddr;
     }
 
     /**

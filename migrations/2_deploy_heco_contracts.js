@@ -10,7 +10,8 @@ const TokenManager = artifacts.require("TokenManager");
 //      a. master:   deploy atlasManager
 //      b. atlasUser:
 module.exports = function(deployer) {
-  deployer.deploy(ConvertLib);
-  deployer.link(ConvertLib, MetaCoin);
-  deployer.deploy(MetaCoin);
+  // deployer.deploy(ConvertLib);
+  // deployer.link(ConvertLib, MetaCoin);
+  // deployer.deploy(MetaCoin);
+
 };
