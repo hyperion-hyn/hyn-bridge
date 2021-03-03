@@ -9,7 +9,7 @@ bootstrap_ganache $PROJECT_PATH
 # Run test
 #truffle compile --all
 #truffle test --network development
-truffle test ./test/atlas_manager_test.js --network development
+truffle test ./test/all_in_one_test.js --network development
 #truffle test ./test/common_test.js --network development
 
 shut_down_ganache $PROJECT_PATH

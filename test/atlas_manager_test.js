@@ -51,13 +51,26 @@ contract('ERC20AtlasManager Testing', (accounts) => {
 
 
     // unlock
-    const receiptId = '0x041a37cedac8dd5e898751523e2c6bef7e97f1f9abde27eb659702f72dd1fe02'
+    let receiptId = '0x041a37cedac8dd5e898751523e2c6bef7e97f1f9abde27eb659702f72dd1fe02'
     let hynBalance = await web3.eth.getBalance(recipient)
-    const expectBalance = web3.utils.toBN(hynBalance).add(web3.utils.toBN(lockHynAmount));
+    let expectBalance = web3.utils.toBN(hynBalance).add(web3.utils.toBN(lockHynAmount));
     tx = await atlasManager.unlockHyn(lockHynAmount, recipient, receiptId)
     await truffleAssert.eventEmitted(tx, 'Unlocked', (ev) => {
       return ev.token === hynTokenAddress && ev.amount == lockHynAmount && ev.recipient === recipient && ev.receiptId === receiptId;
     }, "Unlocked event should be emitted");
+    hynBalance = await web3.eth.getBalance(recipient)
+    assert.equal(expectBalance.toString(), hynBalance.toString())
+
+    receiptId = '0x041a37cedac8dd5e898751523e2c6bef7e97f1f9abde27eb659702f72dd1fe03'
+    tokenBalance = await atlas20Token.balanceOf(recipient)
+    expectBalance = web3.utils.toBN(tokenBalance).add(web3.utils.toBN(lockTokenAmount));
+    tx = await atlasManager.unlockToken(atlas20Token.address, lockTokenAmount, recipient, receiptId)
+    await truffleAssert.eventEmitted(tx, 'Unlocked', (ev) => {
+      return ev.token === atlas20Token.address && ev.amount == lockTokenAmount && ev.recipient === recipient && ev.receiptId === receiptId;
+    }, "Unlocked event should be emitted");
+    tokenBalance = await atlas20Token.balanceOf(recipient)
+    console.log('xxx', tokenBalance.toString(), expectBalance.toString())
+    assert.equal(expectBalance.toString(), tokenBalance.toString())
 
     // await hecoManager.mintToken(heco20Token.address, web3.utils.toWei('1', 'ether'), recipient, '0x041a37cedac8dd5e898751523e2c6bef7e97f1f9abde27eb659702f72dd1fe02')
 
