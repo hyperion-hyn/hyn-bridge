@@ -47,6 +47,22 @@ module.exports = {
             gasPrice: 10000000000
         },
 
+        // testnet - heco
+        hecotest: {
+            provider: () => new HDWalletProvider(process.env.ADMIN_MNENOMIC, "https://http-testnet.hecochain.com"),
+            network_id: 256,
+            gas: 8000000,
+            gasPrice: 1000000000
+        },
+
+        // mainnet - heco
+        heco: {
+            provider: () => new HDWalletProvider(process.env.ADMIN_MNENOMIC, "https://http-mainnet-node.huobichain.com"),
+            network_id: 128,
+            gas: 8000000,
+            gasPrice: 1000000000
+        },
+
         // testnet - ropsten
         ropsten: {
             provider: () => new HDWalletProvider(process.env.MNENOMIC, "https://ropsten.infura.io/v3/" + process.env.INFURA_API_KEY),

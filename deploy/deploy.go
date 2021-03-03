@@ -17,22 +17,13 @@ import (
 	"time"
 )
 
-type contractType byte
-
-const (
-	rpToken contractType = iota
-	hynStaking
-	hynStakingMock
-	rpHolding
-)
-
 func InitConfig() {
 	viper.SetConfigName("config") // config file name without extension
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config/") // config file path
+	viper.AddConfigPath("./config/")  // config file path
 	viper.AddConfigPath("../config/") // config file path
-	viper.SetEnvPrefix("rp")
+	//viper.SetEnvPrefix("rp")
 	viper.AutomaticEnv() // read value ENV variable
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -46,22 +37,21 @@ func main() {
 	//deployContract(rpToken)
 	//deployContract(hynStaking)
 	//deployContract(hynStakingMock)
-	deployContract(rpHolding)
+	deployContract()
 }
 
 func GetRPCUrlFromConfig() string {
 	env := viper.GetString("env")
 	url := viper.GetString(env + ".url")
-	fmt.Printf("url: %v \n", url)
 	return url
 }
 
 func GetPrivateKeyFromConfig() string {
-	key := viper.GetString("private_key")
+	key := viper.GetString("admin_private_key")
 	return key
 }
 
-func deployContract(cType contractType) {
+func deployContract() {
 	client, err := ethclient.Dial(GetRPCUrlFromConfig())
 	if err != nil {
 		log.Fatal(err)
@@ -83,11 +73,10 @@ func deployContract(cType contractType) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("deploy user: %v \n", fromAddress.String())
 
-	//gasPrice, err := client.SuggestGasPrice(context.Background())
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	balance, _ := client.BalanceAt(context.Background(), fromAddress, nil)
+	fmt.Printf("balance is: %v \n", balance)
 
 	auth := bind.NewKeyedTransactor(privateKey)
 	auth.Nonce = big.NewInt(int64(nonce))
@@ -99,20 +88,12 @@ func deployContract(cType contractType) {
 		contractAddr common.Address
 		tx           *types.Transaction
 	)
-	switch cType {
-	case rpToken:
-		contractAddr, tx, _, err = DeployRPToken(auth, client)
-	case hynStaking:
-		contractAddr, tx, _, err = DeployHYNStaking(auth, client)
-	case hynStakingMock:
-		contractAddr, tx, _, err = DeployHYNStakingMock(auth, client)
-	case rpHolding:
-		contractAddr, tx, _, err = DeployRPHolding(auth, client)
-	default:
-		log.Fatal("invalid contract type")
-	}
+
+	contractAddr, tx, _, err = DeployERC20AtlasManager(auth, client)
+
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 	fmt.Printf("tx hash: %v \n", tx.Hash().Hex())
 	fmt.Printf("contract address: %v \n", contractAddr.Hex())

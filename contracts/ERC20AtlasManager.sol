@@ -21,7 +21,7 @@ contract ERC20AtlasManager is Ownable {
     );
 
     event Unlocked(
-        address hynToken,
+        address token,
         uint256 amount,
         address recipient,
         bytes32 receiptId
