@@ -6,3 +6,5 @@ make setup
 make third_party
 
 npm install
+
+# deploy
