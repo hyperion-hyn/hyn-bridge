@@ -11,7 +11,12 @@ let hecoManager;
 // for test
 let tokenManagerAddress = '0xc6526A3B7E35a1ACDdAA85E5879AD301fa46724e'
 let hecoManagerAddress = '0x33bB65f976659AB3b7142812c158aEd404c73611'
-let rpTokenAddress = '0x562D6AFA2A0aD94c8B2946e23C96E27F3cD023e8'   //0x88880126bC73107118f18000309d10dB9f1d6a14
+let rpTokenAddress = '0x562D6AFA2A0aD94c8B2946e23C96E27F3cD023e8'
+
+// mainnet
+// let tokenManagerAddress = ''
+// let hecoManagerAddress = ''
+// let rpTokenAddress = '0x88880126bC73107118f18000309d10dB9f1d6a14'
 
 const HYN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
