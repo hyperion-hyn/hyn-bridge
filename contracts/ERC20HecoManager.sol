@@ -29,19 +29,19 @@ contract ERC20HecoManager is Ownable {
         bytes32 receiptId
     );
 
-//    address public wallet;
-//    modifier onlyWallet {
-//        require(msg.sender == wallet, "HecoManager/not-authorized");
-//        _;
-//    }
-//
-//    /**
-//     * @dev constructor
-//     * @param _wallet is the multisig wallet
-//     */
-//    constructor(address _wallet) public {
-//        wallet = _wallet;
-//    }
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "HecoManager/not-authorized");
+        _;
+    }
+
+    /**
+     * @dev constructor
+     * @param _wallet is the multisig wallet
+     */
+    constructor(address _wallet) public {
+        wallet = _wallet;
+    }
 
     /**
      * @dev map an atlas token to heco
@@ -57,7 +57,7 @@ contract ERC20HecoManager is Ownable {
         string memory name,
         string memory symbol,
         uint8 decimals
-    ) public onlyOwner {
+    ) public onlyWallet {
         address heco20TokenAddr = TokenManager(tokenManager).addToken(
             hynTokenAddr,
             name,
@@ -72,7 +72,7 @@ contract ERC20HecoManager is Ownable {
      * @param tokenManager address to token manager
      * @param hynTokenAddr address to remove token
      */
-    function removeToken(address tokenManager, address hynTokenAddr) public onlyOwner {
+    function removeToken(address tokenManager, address hynTokenAddr) public onlyWallet {
         TokenManager(tokenManager).removeToken(hynTokenAddr, 0);
     }
 
@@ -103,7 +103,7 @@ contract ERC20HecoManager is Ownable {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public onlyOwner {
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "HecoManager/The lock event cannot be reused"

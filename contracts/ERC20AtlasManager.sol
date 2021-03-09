@@ -27,19 +27,19 @@ contract ERC20AtlasManager is Ownable {
         bytes32 receiptId
     );
 
-//    address public wallet;
-//    modifier onlyWallet {
-//        require(msg.sender == wallet, "AtlasManager/not-authorized");
-//        _;
-//    }
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "AtlasManager/not-authorized");
+        _;
+    }
 
-//    /**
-//     * @dev constructor
-//     * @param _wallet is the multisig wallet
-//     */
-//    constructor() public {
-//        wallet = _wallet;
-//    }
+    /**
+     * @dev constructor
+     * @param _wallet is the multisig wallet
+     */
+    constructor(address _wallet) public {
+        wallet = _wallet;
+    }
 
     /**
      * @dev lock tokens to be minted on heco chain
@@ -77,7 +77,7 @@ contract ERC20AtlasManager is Ownable {
         address userAddr,
         uint256 amount,
         address recipient
-    ) public onlyOwner {
+    ) public onlyWallet {
         require(
             recipient != address(0),
             "AtlasManager/recipient is a zero address"
@@ -103,7 +103,7 @@ contract ERC20AtlasManager is Ownable {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public onlyOwner {
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "AtlasManager/The burn event cannot be reused"
@@ -141,7 +141,7 @@ contract ERC20AtlasManager is Ownable {
         uint256 amount,
         address payable recipient,
         bytes32 receiptId
-    ) public onlyOwner {
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "AtlasManager/The burn event cannot be reused"
