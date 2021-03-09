@@ -40,9 +40,9 @@ module.exports = {
         // options below to some value.
         //
         development: {
-            // host: "127.0.0.1",     // Localhost (default: none)
-            // port: 7545,            // Standard Ethereum port (default: none)
-            provider: () => new HDWalletProvider(process.env.ADMIN_MNENOMIC, "http://127.0.0.1:7545"),
+            host: "127.0.0.1",     // Localhost (default: none)
+            port: 7545,            // Standard Ethereum port (default: none)
+            // provider: () => new HDWalletProvider(process.env.ADMIN_MNENOMIC, "http://127.0.0.1:7545"),
             network_id: 5777,       // Any network (default: none)
             gas: 10000000,
             gasPrice: 10000000000

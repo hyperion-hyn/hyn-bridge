@@ -89,16 +89,26 @@ func deployContract() {
 		tx           *types.Transaction
 	)
 
-	contractAddr, tx, _, err = DeployERC20AtlasManager(auth, client)
+	committeeAddr := []common.Address{fromAddress}
+	contractAddr, tx, _, err = DeployMultiSigWallet(auth, client, committeeAddr, big.NewInt(1))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Printf("MultiSigWallet tx hash: %v \n", tx.Hash().Hex())
+	fmt.Printf("MultiSigWallet contract address: %v \n", contractAddr.Hex())
+
+	auth.Nonce = big.NewInt(int64(nonce + 1))
+	contractAddr, tx, _, err = DeployERC20AtlasManager(auth, client, contractAddr)
 
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("tx hash: %v \n", tx.Hash().Hex())
-	fmt.Printf("contract address: %v \n", contractAddr.Hex())
+	fmt.Printf("ERC20AtlasManager tx hash: %v \n", tx.Hash().Hex())
+	fmt.Printf("ERC20AtlasManager contract address: %v \n", contractAddr.Hex())
 
-	time.Sleep(12 * time.Second)
+	time.Sleep(18 * time.Second)
 
 	receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
 	if err != nil {

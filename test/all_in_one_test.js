@@ -3,6 +3,13 @@ const MyERC20 = artifacts.require("MyERC20");
 const ERC20HecoManager = artifacts.require("ERC20HecoManager");
 const TokenManager = artifacts.require("TokenManager");
 const BridgedToken = artifacts.require("BridgedToken");
+const MultiSigWallet = artifacts.require("MultiSigWallet");
+
+const HECO_MANAGER_JSON = require('../build/contracts/ERC20HecoManager.json')
+const ATLAS_MANAGER_JSON = require('../build/contracts/ERC20AtlasManager.json')
+
+let hecoManagerContract;
+let atlasManagerContract;
 
 const truffleAssert = require('truffle-assertions');
 
@@ -10,6 +17,8 @@ let tokenManager;
 let hecoManager;
 let atlasManager;
 let rpToken;
+let multiSigWalletHeco;
+let multiSigWalletHyn;
 
 const HYN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
@@ -18,10 +27,17 @@ contract('All in one testing', (accounts) => {
   let user = accounts[1];   // user account
   let recipient = accounts[2];
 
+  let committeeAddr1 = accounts[3];
+
   beforeEach("Initialize", async () => {
-    atlasManager = await ERC20AtlasManager.new();
-    tokenManager = await TokenManager.new();
-    hecoManager = await ERC20HecoManager.new();
+      hecoManagerContract = new web3.eth.Contract(HECO_MANAGER_JSON.abi)
+      atlasManagerContract = new web3.eth.Contract(ATLAS_MANAGER_JSON.abi)
+
+      multiSigWalletHeco = await MultiSigWallet.new([committeeAddr1], 1);
+      multiSigWalletHyn = await MultiSigWallet.new([committeeAddr1], 1);
+      atlasManager = await ERC20AtlasManager.new(multiSigWalletHyn.address);
+      tokenManager = await TokenManager.new();
+      hecoManager = await ERC20HecoManager.new(multiSigWalletHeco.address);
   });
 
   it("test all", async () => {
@@ -38,7 +54,8 @@ contract('All in one testing', (accounts) => {
     await rpToken.mint(recipient, web3.utils.toWei('100', 'ether'));
 
     // mapping tokens
-    await hecoManager.addToken(tokenManager.address, rpToken.address, name, symbol, decimals)
+    let abi = hecoManagerContract.methods.addToken(tokenManager.address, rpToken.address, name, symbol, decimals).encodeABI()
+    await multiSigWalletHeco.submitTransaction(hecoManager.address, 0, abi, {from: committeeAddr1});
     let hecoRpTokenAddr = await tokenManager.mappedTokens(rpToken.address);
     let hecoRpToken = await BridgedToken.at(hecoRpTokenAddr);
 
@@ -48,7 +65,9 @@ contract('All in one testing', (accounts) => {
     tx = await atlasManager.lockToken(rpToken.address, lockTokenAmount, recipient, {from: recipient})
     console.log('xxx1', tx.receipt.transactionHash, tx.receipt.gasUsed)
 
-    tx = await hecoManager.mintToken(hecoRpToken.address, lockTokenAmount, recipient, tx.receipt.transactionHash)
+
+    abi = hecoManagerContract.methods.mintToken(hecoRpToken.address, lockTokenAmount, recipient, tx.receipt.transactionHash).encodeABI()
+    tx = await multiSigWalletHeco.submitTransaction(hecoManager.address, 0, abi, {from: committeeAddr1});
     console.log('xxx2', tx.receipt.transactionHash, tx.receipt.gasUsed)
     let hecoRpTokenBalance = await hecoRpToken.balanceOf(recipient)
     assert.equal(hecoRpTokenBalance.toString(), lockTokenAmount.toString())
@@ -63,14 +82,19 @@ contract('All in one testing', (accounts) => {
 
     let rpTokenBalance = await rpToken.balanceOf(recipient)
     let expectBalance = web3.utils.toBN(rpTokenBalance).add(web3.utils.toBN(burnAmount));
-    tx = await atlasManager.unlockToken(rpToken.address, burnAmount, recipient, tx.receipt.transactionHash)
+    abi = atlasManagerContract.methods.unlockToken(rpToken.address, burnAmount.toString(), recipient, tx.receipt.transactionHash).encodeABI()
+    tx = await multiSigWalletHyn.submitTransaction(atlasManager.address, 0, abi, {from: committeeAddr1});
+    // tx = await atlasManager.unlockToken(rpToken.address, burnAmount, recipient, tx.receipt.transactionHash)
     console.log('xxx4', tx.receipt.transactionHash, tx.receipt.gasUsed)
     rpTokenBalance = await rpToken.balanceOf(recipient)
     assert.equal(rpTokenBalance.toString(), expectBalance.toString())
 
 
     /// hyn
-    await hecoManager.addToken(tokenManager.address, HYN_ADDRESS, 'Hyperion Token', 'HYN', 18)
+    abi = hecoManagerContract.methods.addToken(tokenManager.address, HYN_ADDRESS, 'Hyperion Token', 'HYN', 18).encodeABI()
+    tx = await multiSigWalletHeco.submitTransaction(hecoManager.address, 0, abi, {from: committeeAddr1});
+    console.log('yyy0', tx.receipt.transactionHash, tx.receipt.gasUsed)
+    // await hecoManager.addToken(tokenManager.address, HYN_ADDRESS, 'Hyperion Token', 'HYN', 18)
     let hecoHynTokenAddr = await tokenManager.mappedTokens(HYN_ADDRESS);
     let hecoHynToken = await BridgedToken.at(hecoHynTokenAddr);
 
@@ -86,7 +110,9 @@ contract('All in one testing', (accounts) => {
     // mint in heco
     let hecoHynBalance = await hecoHynToken.balanceOf(recipient)
     let expectHecoHynBalance = web3.utils.toBN(hecoHynBalance).add(web3.utils.toBN(lockAmount));
-    tx = await hecoManager.mintToken(hecoHynToken.address, lockAmount, recipient, tx.receipt.transactionHash)
+    abi = hecoManagerContract.methods.mintToken(hecoHynToken.address, lockAmount, recipient, tx.receipt.transactionHash).encodeABI()
+    tx = await multiSigWalletHeco.submitTransaction(hecoManager.address, 0, abi, {from: committeeAddr1});
+    // tx = await hecoManager.mintToken(hecoHynToken.address, lockAmount, recipient, tx.receipt.transactionHash)
     console.log('yyy2', tx.receipt.transactionHash, tx.receipt.gasUsed)
     hecoHynBalance = await hecoHynToken.balanceOf(recipient)
     assert.equal(hecoHynBalance.toString(), expectHecoHynBalance.toString())
@@ -102,7 +128,9 @@ contract('All in one testing', (accounts) => {
 
     hynBalance = await web3.eth.getBalance(recipient, 'latest')
     expectBalance = web3.utils.toBN(hynBalance).add(web3.utils.toBN(burnHynAmount));
-    tx = await atlasManager.unlockHyn(burnHynAmount, recipient, tx.receipt.transactionHash)
+    abi = atlasManagerContract.methods.unlockHyn(burnHynAmount.toString(), recipient, tx.receipt.transactionHash).encodeABI()
+    tx = await multiSigWalletHyn.submitTransaction(atlasManager.address, 0, abi, {from: committeeAddr1});
+    // tx = await atlasManager.unlockHyn(burnHynAmount, recipient, tx.receipt.transactionHash)
     console.log('yyy4', tx.receipt.transactionHash, tx.receipt.gasUsed)
     hynBalance = await web3.eth.getBalance(recipient, 'latest')
     assert.equal(hynBalance.toString(), expectBalance.toString())
